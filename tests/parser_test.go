@@ -8,8 +8,8 @@ import (
 
 func TestParserAst_VarStatement(t *testing.T) {
 	input := `
-var x = 5;
-var y = 13;
+var first_var: int = 5;
+var second_var: int = 13;
 `
 	lexer_ := lexer.New(input)
 	parser_ := parser.New(lexer_)
@@ -27,8 +27,8 @@ var y = 13;
 	tests := []struct {
 		expectedIdentifier string
 	}{
-		{"x"},
-		{"y"},
+		{"first_var"},
+		{"second_var"},
 	}
 
 	for iter, tokenType := range tests {

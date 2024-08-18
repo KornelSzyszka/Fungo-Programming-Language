@@ -6,6 +6,7 @@ const (
 	EOF        TokenType = "END OF FILE"
 	IDENTIFIER           = "IDENTIFIER"
 	ILLEGAL              = "ILLEGAL"
+	VARTYPE              = "VARIABLE TYPE"
 
 	VARIABLE = "VARIABLE"
 	FUNCTION = "FUNCTION"
@@ -16,6 +17,8 @@ const (
 	RETURN   = "RETURN"
 
 	INTEGER = "INTEGER"
+	FLOAT   = "FLOAT"
+	STRING  = "STRING"
 
 	TRUE  = "TRUE"
 	FALSE = "FALSE"
@@ -63,6 +66,10 @@ var keywords = map[string]TokenType{
 	"if":     IF,
 	"else":   ELSE,
 	"return": RETURN,
+	"int":    VARTYPE,
+	"float":  VARTYPE,
+	"string": VARTYPE,
+	"bool":   VARTYPE,
 }
 
 func LookupIdentifier(identifier string) TokenType {

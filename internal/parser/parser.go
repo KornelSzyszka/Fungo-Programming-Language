@@ -71,6 +71,15 @@ func (parser *Parser) parseVarStatement() Statement {
 
 	statement.Name = &Identifier{Token: parser.currentToken, Value: parser.currentToken.Value}
 
+	if !parser.expectNext(lexer.COLON) {
+		return nil
+	}
+	if !parser.expectNext(lexer.VARTYPE) {
+		return nil
+	}
+
+	statement.VarType = &VarType{Token: parser.currentToken, Value: parser.currentToken.Value}
+
 	if !parser.expectNext(lexer.ASSIGN) {
 		return nil
 	}

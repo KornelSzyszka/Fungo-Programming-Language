@@ -39,10 +39,21 @@ func (ident *Identifier) TokenLiteral() string {
 	return ident.Token.Value
 }
 
-type VarStatement struct {
+type VarType struct {
 	Token lexer.Token
-	Name  *Identifier
-	Value Expression
+	Value string
+}
+
+func (varType *VarType) ExpressionNode() {}
+func (varType *VarType) TokenLiteral() string {
+	return varType.Token.Value
+}
+
+type VarStatement struct {
+	Token   lexer.Token
+	Name    *Identifier
+	VarType *VarType
+	Value   Expression
 }
 
 func (statement *VarStatement) StatementNode() {}

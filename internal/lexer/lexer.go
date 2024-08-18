@@ -124,8 +124,7 @@ func (lexer *Lexer) NextToken() Token {
 	default:
 		token_ = Token{Type: ILLEGAL, Value: string(lexer.currentChar)}
 
-		// TODO: Handle _ in names -> 19/206
-		if unicode.IsLetter(lexer.currentChar) {
+		if isLetter(lexer.currentChar) {
 			token_ = Token{Type: IDENTIFIER, Value: lexer.readIdentifier()}
 			token_.Type = LookupIdentifier(token_.Value)
 			return token_
@@ -138,6 +137,10 @@ func (lexer *Lexer) NextToken() Token {
 	}
 	lexer.readChar()
 	return token_
+}
+
+func isLetter(char rune) bool {
+	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'
 }
 
 func (lexer *Lexer) getChar() rune {
@@ -157,7 +160,7 @@ func (lexer *Lexer) skipWhitespace() {
 
 func (lexer *Lexer) readIdentifier() string {
 	start := lexer.position
-	for unicode.IsLetter(lexer.currentChar) {
+	for isLetter(lexer.currentChar) {
 		lexer.readChar()
 	}
 	return lexer.input[start:lexer.position]
