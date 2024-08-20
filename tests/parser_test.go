@@ -8,9 +8,9 @@ import (
 
 func TestParserAst_VarStatement(t *testing.T) {
 	input := `
-var first_var: int = 5;
-var second_var: int = 13;
-`
+	var first_var: int = 5;
+	var second_var: int = 13;
+	`
 	lexer_ := lexer.New(input)
 	parser_ := parser.New(lexer_)
 
@@ -20,6 +20,7 @@ var second_var: int = 13;
 	if program == nil {
 		t.Fatalf("ParseProgram() returned nil")
 	}
+
 	if len(program.Statements) != 2 {
 		t.Fatalf("ParseProgram() did not return 2 statements. Got=%d", len(program.Statements))
 	}
@@ -36,6 +37,66 @@ var second_var: int = 13;
 		if !testParserAstVarStatement(t, statement, tokenType.expectedIdentifier) {
 			return
 		}
+	}
+}
+
+func TestParserAst_ReturnStatement(t *testing.T) {
+	input := `
+	return 5;
+	return 13;
+	`
+	lexer_ := lexer.New(input)
+	parser_ := parser.New(lexer_)
+
+	program := parser_.ParseProgram()
+	checkParserErrors(t, parser_)
+
+	if program == nil {
+		t.Fatalf("ParseProgram() returned nil")
+	}
+
+	if len(program.Statements) != 2 {
+		t.Fatalf("ParseProgram() did not return 2 statements. Got=%d", len(program.Statements))
+	}
+
+	for _, statement := range program.Statements {
+		retStatement, ok := statement.(*parser.ReturnStatement)
+
+		if !ok {
+			t.Errorf("ReturnStatement() did not return a ReturnStatement. Got=%T", statement)
+			continue
+		}
+
+		if retStatement.TokenLiteral() != "return" {
+			t.Errorf("ReturnStatement() did not return a return. Got=%s", retStatement.TokenLiteral())
+		}
+
+	}
+}
+
+func TestParserAst_String(t *testing.T) {
+	program := &parser.Program{
+		Statements: []parser.Statement{
+			&parser.VarStatement{
+				Token: lexer.Token{Type: lexer.VARIABLE, Value: "var"},
+				Name: &parser.Identifier{
+					Token: lexer.Token{Type: lexer.IDENTIFIER, Value: "first_var"},
+					Value: "first_var",
+				},
+				VarType: &parser.VarType{
+					Token: lexer.Token{Type: lexer.IDENTIFIER},
+					Value: "int",
+				},
+				Value: &parser.Identifier{
+					Token: lexer.Token{Type: lexer.IDENTIFIER, Value: "second_var"},
+					Value: "second_var",
+				},
+			},
+		},
+	}
+
+	if program.String() != "var first_var: int = second_var;" {
+		t.Errorf("program.String() wrong. got=%q", program.String())
 	}
 }
 

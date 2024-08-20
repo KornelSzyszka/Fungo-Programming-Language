@@ -57,6 +57,8 @@ func (parser *Parser) parseStatement() Statement {
 	switch parser.currentToken.Type {
 	case lexer.VARIABLE:
 		return parser.parseVarStatement()
+	case lexer.RETURN:
+		return parser.parseReturnStatement()
 	default:
 		return nil
 	}
@@ -83,6 +85,16 @@ func (parser *Parser) parseVarStatement() Statement {
 	if !parser.expectNext(lexer.ASSIGN) {
 		return nil
 	}
+
+	for !parser.currentTokenIs(lexer.SEMICOLON) {
+		parser.getNextToken()
+	}
+
+	return statement
+}
+
+func (parser *Parser) parseReturnStatement() Statement {
+	statement := &ReturnStatement{Token: parser.currentToken}
 
 	for !parser.currentTokenIs(lexer.SEMICOLON) {
 		parser.getNextToken()

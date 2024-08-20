@@ -21,7 +21,7 @@ func TestLexer_NextToken(t *testing.T) {
 	}
 	
 	return 0;
-`
+	`
 
 	tests := []struct {
 		expectedType  lexer.TokenType

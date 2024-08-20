@@ -27,7 +27,7 @@ func (lexer *Lexer) NextToken() Token {
 	lexer.skipWhitespace()
 
 	var token_ Token
-	// TODO: Add arrow
+
 	switch lexer.currentChar {
 	case '=':
 		token_ = Token{Type: ASSIGN, Value: string(lexer.currentChar)}
@@ -39,7 +39,6 @@ func (lexer *Lexer) NextToken() Token {
 			lexer.readChar()
 		}
 	case '!':
-		token_ = Token{Type: ILLEGAL, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '=' {
 			token_ = Token{
 				Type:  NOTEQUAL,
