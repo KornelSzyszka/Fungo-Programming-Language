@@ -307,6 +307,76 @@ func testIntegerValue(t *testing.T, expression parser.Expression, value int64) b
 	return true
 }
 
+func testIdentifier(t *testing.T, expression parser.Expression, value string) bool {
+	identifier, ok := expression.(*parser.Identifier)
+	if !ok {
+		t.Errorf("expression is not identifier")
+		return false
+	}
+
+	if identifier.Value != value {
+		t.Errorf("identifier.Value is not '%s'. got=%s", value, identifier.Value)
+		return false
+	}
+
+	if identifier.TokenLiteral() != value {
+		t.Errorf("s.Name is not '%s'. got=%s", value, identifier.TokenLiteral())
+		return false
+	}
+
+	return true
+}
+
+func testLiteralExpression(
+	t *testing.T,
+	expression parser.Expression,
+	expected interface{},
+) bool {
+
+	switch type_ := expected.(type) {
+	case int:
+		return testIntegerValue(t, expression, int64(type_))
+	case int64:
+		return testIntegerValue(t, expression, type_)
+	case string:
+		return testIdentifier(t, expression, type_)
+	}
+
+	t.Errorf("expression has wrong type: %T", expression)
+	return false
+}
+
+// TODO: Rewrite test to more generic
+func testInfixExpression(
+	t *testing.T,
+	expression parser.Expression,
+	left interface{},
+	operator string,
+	right interface{},
+) bool {
+
+	operatorExpression, ok := expression.(*parser.InfixExpression)
+	if !ok {
+		t.Errorf("expression is not InfixExpression")
+		return false
+	}
+
+	if !testLiteralExpression(t, operatorExpression.Left, left) {
+		return false
+	}
+
+	if operatorExpression.Operator != operator {
+		t.Errorf("operator is not '%s'. got=%s", operator, operatorExpression.Operator)
+		return false
+	}
+
+	if !testLiteralExpression(t, operatorExpression.Right, right) {
+		return false
+	}
+
+	return true
+}
+
 func checkParserErrors(t *testing.T, parser_ *parser.Parser) {
 	errors := parser_.Errors()
 

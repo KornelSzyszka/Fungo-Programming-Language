@@ -104,10 +104,8 @@ type ReturnStatement struct {
 	ReturnValue Expression
 }
 
-func (statement *ReturnStatement) StatementNode() {}
-func (statement *ReturnStatement) TokenLiteral() string {
-	return statement.Token.Value
-}
+func (statement *ReturnStatement) StatementNode()       {}
+func (statement *ReturnStatement) TokenLiteral() string { return statement.Token.Value }
 func (statement *ReturnStatement) String() string {
 	var output bytes.Buffer
 
@@ -127,10 +125,8 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
-func (statement *ExpressionStatement) StatementNode() {}
-func (statement *ExpressionStatement) TokenLiteral() string {
-	return statement.Token.Value
-}
+func (statement *ExpressionStatement) StatementNode()       {}
+func (statement *ExpressionStatement) TokenLiteral() string { return statement.Token.Value }
 func (statement *ExpressionStatement) String() string {
 	if statement.Expression != nil {
 		return statement.Expression.String()
@@ -150,6 +146,15 @@ func (statement *IntegerLiteral) TokenLiteral() string {
 func (statement *IntegerLiteral) String() string {
 	return statement.Token.Value
 }
+
+type Boolean struct {
+	Token lexer.Token
+	Value bool
+}
+
+func (boolean *Boolean) expressionNode()      {}
+func (boolean *Boolean) TokenLiteral() string { return boolean.Token.Value }
+func (boolean *Boolean) String() string       { return boolean.Token.Value }
 
 type PrefixExpression struct {
 	Token    lexer.Token
