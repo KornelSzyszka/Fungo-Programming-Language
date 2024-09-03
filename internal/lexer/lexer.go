@@ -7,7 +7,7 @@ import (
 type Lexer struct {
 	input        string
 	position     int  // position in input
-	readPosition int  // after current char
+	readPosition int  // after currentChar
 	currentChar  rune // current char
 }
 

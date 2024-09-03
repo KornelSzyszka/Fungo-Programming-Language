@@ -9,12 +9,28 @@ import (
 const (
 	LOWEST = iota
 	EQUALS
+	LESSGREATEREQ
 	LESSGREATER
 	SUM
 	PRODUCT
+	EXPONENT
 	PREFIX
 	CALL
 )
+
+var precedences = map[lexer.TokenType]int{
+	lexer.EQUAL:     EQUALS,
+	lexer.NOTEQUAL:  EQUALS,
+	lexer.LESS:      LESSGREATER,
+	lexer.GREATER:   LESSGREATER,
+	lexer.LESSEQ:    LESSGREATEREQ,
+	lexer.GREATEREQ: LESSGREATEREQ,
+	lexer.PLUS:      SUM,
+	lexer.MINUS:     SUM,
+	lexer.SLASH:     PRODUCT,
+	lexer.ASTERISK:  PRODUCT,
+	lexer.POWER:     EXPONENT,
+}
 
 type (
 	prefixParser func() Expression
@@ -41,6 +57,19 @@ func New(lexer_ *lexer.Lexer) *Parser {
 	parser.registerPrefix(lexer.INTEGER, parser.parseIntegerLiteral)
 	parser.registerPrefix(lexer.NEGATION, parser.parsePrefixExpression)
 	parser.registerPrefix(lexer.MINUS, parser.parsePrefixExpression)
+
+	parser.infixParser = make(map[lexer.TokenType]infixParser)
+	parser.registerInfix(lexer.PLUS, parser.parseInfixExpression)
+	parser.registerInfix(lexer.MINUS, parser.parseInfixExpression)
+	parser.registerInfix(lexer.SLASH, parser.parseInfixExpression)
+	parser.registerInfix(lexer.ASTERISK, parser.parseInfixExpression)
+	parser.registerInfix(lexer.POWER, parser.parseInfixExpression)
+	parser.registerInfix(lexer.EQUAL, parser.parseInfixExpression)
+	parser.registerInfix(lexer.NOTEQUAL, parser.parseInfixExpression)
+	parser.registerInfix(lexer.LESS, parser.parseInfixExpression)
+	parser.registerInfix(lexer.LESSEQ, parser.parseInfixExpression)
+	parser.registerInfix(lexer.GREATER, parser.parseInfixExpression)
+	parser.registerInfix(lexer.GREATEREQ, parser.parseInfixExpression)
 
 	parser.getNextToken()
 	parser.getNextToken()
@@ -75,6 +104,20 @@ func (parser *Parser) nextTokenError(tokenType lexer.TokenType) {
 func (parser *Parser) getNextToken() {
 	parser.currentToken = parser.nextToken
 	parser.nextToken = parser.lexer_.NextToken()
+}
+
+func (parser *Parser) getNextPrecedence() int {
+	if precedence, ok := precedences[parser.nextToken.Type]; ok {
+		return precedence
+	}
+	return LOWEST
+}
+
+func (parser *Parser) currentPrecedence() int {
+	if precedence, ok := precedences[parser.currentToken.Type]; ok {
+		return precedence
+	}
+	return LOWEST
 }
 
 func (parser *Parser) parseStatement() Statement {
@@ -135,7 +178,20 @@ func (parser *Parser) parseExpression(precedence int) Expression {
 		return nil
 	}
 
-	return prefix()
+	leftExpression := prefix()
+
+	for !parser.nextTokenIs(lexer.SEMICOLON) && precedence < parser.getNextPrecedence() {
+		infix := parser.infixParser[parser.nextToken.Type]
+		if infix == nil {
+			return leftExpression
+		}
+
+		parser.getNextToken()
+
+		leftExpression = infix(leftExpression)
+	}
+
+	return leftExpression
 }
 
 func (parser *Parser) parsePrefixExpression() Expression {
@@ -147,6 +203,20 @@ func (parser *Parser) parsePrefixExpression() Expression {
 	parser.getNextToken()
 
 	expression.Right = parser.parseExpression(PREFIX)
+
+	return expression
+}
+
+func (parser *Parser) parseInfixExpression(left Expression) Expression {
+	expression := &InfixExpression{
+		Token:    parser.currentToken,
+		Operator: parser.currentToken.Value,
+		Left:     left,
+	}
+
+	precedence := parser.currentPrecedence()
+	parser.getNextToken()
+	expression.Right = parser.parseExpression(precedence)
 
 	return expression
 }
