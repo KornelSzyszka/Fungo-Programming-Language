@@ -3,6 +3,22 @@ package parser
 import (
 	"Fungo/internal/lexer"
 	"fmt"
+	"strconv"
+)
+
+const (
+	LOWEST = iota
+	EQUALS
+	LESSGREATER
+	SUM
+	PRODUCT
+	PREFIX
+	CALL
+)
+
+type (
+	prefixParser func() Expression
+	infixParser  func(Expression) Expression
 )
 
 type Parser struct {
@@ -10,6 +26,8 @@ type Parser struct {
 	currentToken lexer.Token
 	nextToken    lexer.Token
 	errors       []string
+	prefixParser map[lexer.TokenType]prefixParser
+	infixParser  map[lexer.TokenType]infixParser
 }
 
 func New(lexer_ *lexer.Lexer) *Parser {
@@ -17,6 +35,12 @@ func New(lexer_ *lexer.Lexer) *Parser {
 		lexer_: lexer_,
 		errors: []string{},
 	}
+
+	parser.prefixParser = make(map[lexer.TokenType]prefixParser)
+	parser.registerPrefix(lexer.IDENTIFIER, parser.parseIdentifier)
+	parser.registerPrefix(lexer.INTEGER, parser.parseIntegerLiteral)
+	parser.registerPrefix(lexer.NEGATION, parser.parsePrefixExpression)
+	parser.registerPrefix(lexer.MINUS, parser.parsePrefixExpression)
 
 	parser.getNextToken()
 	parser.getNextToken()
@@ -60,8 +84,76 @@ func (parser *Parser) parseStatement() Statement {
 	case lexer.RETURN:
 		return parser.parseReturnStatement()
 	default:
+		return parser.parseExpressionStatement()
+	}
+}
+
+func (parser *Parser) registerPrefix(tokenType lexer.TokenType, prefix prefixParser) {
+	parser.prefixParser[tokenType] = prefix
+}
+
+func (parser *Parser) registerInfix(tokenType lexer.TokenType, infix infixParser) {
+	parser.infixParser[tokenType] = infix
+}
+
+func (parser *Parser) parseIdentifier() Expression {
+	return &Identifier{Token: parser.currentToken, Value: parser.currentToken.Value}
+}
+
+func (parser *Parser) parseIntegerLiteral() Expression {
+	integerLiteral := &IntegerLiteral{Token: parser.currentToken}
+
+	value, err := strconv.ParseInt(parser.currentToken.Value, 10, 64)
+	if err != nil {
+		message := fmt.Sprintf("could not parse %q as integer", parser.currentToken.Value)
+		parser.errors = append(parser.errors, message)
 		return nil
 	}
+
+	integerLiteral.Value = value
+
+	return integerLiteral
+}
+
+func (parser *Parser) parseExpressionStatement() *ExpressionStatement {
+	statement := &ExpressionStatement{Token: parser.currentToken}
+
+	statement.Expression = parser.parseExpression(LOWEST)
+
+	if parser.nextTokenIs(lexer.SEMICOLON) {
+		parser.getNextToken()
+	}
+
+	return statement
+}
+
+func (parser *Parser) parseExpression(precedence int) Expression {
+	prefix := parser.prefixParser[parser.currentToken.Type]
+
+	if prefix == nil {
+		parser.noPrefixParseFnError(parser.currentToken.Type)
+		return nil
+	}
+
+	return prefix()
+}
+
+func (parser *Parser) parsePrefixExpression() Expression {
+	expression := &PrefixExpression{
+		Token:    parser.currentToken,
+		Operator: parser.currentToken.Value,
+	}
+
+	parser.getNextToken()
+
+	expression.Right = parser.parseExpression(PREFIX)
+
+	return expression
+}
+
+func (parser *Parser) noPrefixParseFnError(tokenType lexer.TokenType) {
+	message := fmt.Sprintf("no prefix parse function for %s found", tokenType)
+	parser.errors = append(parser.errors, message)
 }
 
 func (parser *Parser) parseVarStatement() Statement {

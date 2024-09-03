@@ -39,6 +39,7 @@ func (lexer *Lexer) NextToken() Token {
 			lexer.readChar()
 		}
 	case '!':
+		token_ = Token{Type: NEGATION, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '=' {
 			token_ = Token{
 				Type:  NOTEQUAL,

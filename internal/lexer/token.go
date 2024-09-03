@@ -23,6 +23,8 @@ const (
 	TRUE  = "TRUE"
 	FALSE = "FALSE"
 
+	NEGATION = "NEGATION"
+
 	ASSIGN    = "ASSIGN"
 	EQUAL     = "EQUAL"
 	NOTEQUAL  = "NOT EQUAL"
