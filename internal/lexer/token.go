@@ -1,63 +1,67 @@
 package lexer
 
+// TokenType represents the type of token as a string.
 type TokenType string
 
+// List of token types to represent various elements of the language's syntax.
 const (
-	EOF        TokenType = "END OF FILE"
-	IDENTIFIER           = "IDENTIFIER"
-	ILLEGAL              = "ILLEGAL"
-	VARTYPE              = "VARIABLE TYPE"
+	EOF        TokenType = "END OF FILE"   // Marks the end of the input.
+	IDENTIFIER           = "IDENTIFIER"    // Represents identifiers (variable/function names).
+	ILLEGAL              = "ILLEGAL"       // Marks illegal/unknown characters.
+	VARTYPE              = "VARIABLE TYPE" // Represents variable types like int, float, etc.
 
-	VARIABLE = "VARIABLE"
-	FUNCTION = "FUNCTION"
-	CONSTANT = "CONSTANT"
-	ARROW    = "ARROW"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
+	VARIABLE = "VARIABLE" // Keyword 'var' for variable declaration.
+	FUNCTION = "FUNCTION" // Keyword 'func' for function declaration.
+	CONSTANT = "CONSTANT" // Keyword 'const' for constant declaration.
+	ARROW    = "ARROW"    // Represents '->' arrow for function signatures.
+	IF       = "IF"       // Keyword 'if' for conditional statements.
+	ELSE     = "ELSE"     // Keyword 'else' for conditional statements.
+	RETURN   = "RETURN"   // Keyword 'return' for returning values from functions.
 
-	INTEGER = "INTEGER"
-	FLOAT   = "FLOAT"
-	STRING  = "STRING"
+	INTEGER = "INTEGER" // Represents integer literals.
+	FLOAT   = "FLOAT"   // Represents float literals.
+	STRING  = "STRING"  // Represents string literals.
 
-	TRUE  = "TRUE"
-	FALSE = "FALSE"
+	TRUE  = "TRUE"  // Boolean literal 'true'.
+	FALSE = "FALSE" // Boolean literal 'false'.
 
-	NEGATION = "NEGATION"
+	NEGATION = "NEGATION" // Represents negation operator '!'.
 
-	ASSIGN    = "ASSIGN"
-	EQUAL     = "EQUAL"
-	NOTEQUAL  = "NOT EQUAL"
-	LESS      = "LESS"
-	LESSEQ    = "LESS OR EQUAL"
-	GREATER   = "GREATER"
-	GREATEREQ = "GREATER OR EQUAL"
+	ASSIGN    = "ASSIGN"           // Assignment operator '='.
+	EQUAL     = "EQUAL"            // Equality operator '=='.
+	NOTEQUAL  = "NOT EQUAL"        // Not equal operator '!='.
+	LESS      = "LESS"             // Less than operator '<'.
+	LESSEQ    = "LESS OR EQUAL"    // Less than or equal to operator '<='.
+	GREATER   = "GREATER"          // Greater than operator '>'.
+	GREATEREQ = "GREATER OR EQUAL" // Greater than or equal to operator '>='.
 
-	PLUS      = "PLUS"
-	MINUS     = "MINUS"
-	INCREMENT = "INCREMENT"
-	DECREMENT = "DECREMENT"
+	PLUS      = "PLUS"      // Addition operator '+'.
+	MINUS     = "MINUS"     // Subtraction operator '-'.
+	INCREMENT = "INCREMENT" // Increment operator '++'.
+	DECREMENT = "DECREMENT" // Decrement operator '--'.
 
-	ASTERISK = "ASTERISK"
-	POWER    = "POWER"
-	SLASH    = "SLASH"
+	ASTERISK = "ASTERISK" // Multiplication operator '*'.
+	POWER    = "POWER"    // Exponentiation operator '^'.
+	SLASH    = "SLASH"    // Division operator '/'.
 
-	LPAREN    = "LEFT PAREN"
-	RPAREN    = "RIGHT PAREN"
-	LBRACE    = "LEFT BRACE"
-	RBRACE    = "RIGHT BRACE"
-	LBRACKET  = "LEFT BRACKET"
-	RBRACKET  = "RIGHT BRACKET"
-	COLON     = "COLON"
-	SEMICOLON = "SEMICOLON"
-	COMMA     = "COMMA"
+	LPAREN    = "LEFT PAREN"    // Left parenthesis '('.
+	RPAREN    = "RIGHT PAREN"   // Right parenthesis ')'.
+	LBRACE    = "LEFT BRACE"    // Left brace '{'.
+	RBRACE    = "RIGHT BRACE"   // Right brace '}'.
+	LBRACKET  = "LEFT BRACKET"  // Left bracket '['.
+	RBRACKET  = "RIGHT BRACKET" // Right bracket ']'.
+	COLON     = "COLON"         // Colon ':'.
+	SEMICOLON = "SEMICOLON"     // Semicolon ';'.
+	COMMA     = "COMMA"         // Comma ','.
 )
 
+// Token represents a single lexical token with its type and literal value.
 type Token struct {
-	Type  TokenType
-	Value string
+	Type  TokenType // The type of the token (e.g., IDENTIFIER, INTEGER, etc.).
+	Value string    // The literal value of the token (e.g., variable name, number).
 }
 
+// keywords maps string literals to specific token types for reserved keywords.
 var keywords = map[string]TokenType{
 	"var":    VARIABLE,
 	"const":  CONSTANT,
@@ -74,7 +78,9 @@ var keywords = map[string]TokenType{
 	"bool":   VARTYPE,
 }
 
+// LookupIdentifier checks if an identifier is a reserved keyword or a general identifier.
 func LookupIdentifier(identifier string) TokenType {
+	// If the identifier is a keyword, return its token type. Otherwise, return IDENTIFIER.
 	if token, exists := keywords[identifier]; exists {
 		return token
 	}

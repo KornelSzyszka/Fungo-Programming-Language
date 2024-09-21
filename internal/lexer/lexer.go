@@ -4,25 +4,34 @@ import (
 	"unicode"
 )
 
+// Lexer represents a lexical analyzer for tokenizing input strings.
+// It tracks the current position, read position, and current character.
 type Lexer struct {
-	input        string
-	position     int  // position in input
-	readPosition int  // after currentChar
-	currentChar  rune // current char
+	input        string // Input string to be tokenized
+	position     int    // Current position in input
+	readPosition int    // Position after the current character
+	currentChar  rune   // Current character being processed
 }
 
+// New creates a new Lexer instance for a given input string.
+// It initializes the lexer and reads the first character.
 func New(input string) *Lexer {
 	lexer := &Lexer{input: input}
 	lexer.readChar()
 	return lexer
 }
 
+// readChar advances the lexer to the next character in the input string.
+// It updates the current character, position, and readPosition.
 func (lexer *Lexer) readChar() {
 	lexer.currentChar = lexer.getChar()
 	lexer.position = lexer.readPosition
 	lexer.readPosition++
 }
 
+// NextToken returns the next token from the input string.
+// It skips whitespaces and processes different token types, such as operators,
+// delimiters, numbers, and identifiers. It also handles multi-character tokens.
 func (lexer *Lexer) NextToken() Token {
 	lexer.skipWhitespace()
 
@@ -139,10 +148,13 @@ func (lexer *Lexer) NextToken() Token {
 	return token_
 }
 
+// isLetter checks whether a given character is a letter (a-z, A-Z) or an underscore ('_').
 func isLetter(char rune) bool {
 	return 'a' <= char && char <= 'z' || 'A' <= char && char <= 'Z' || char == '_'
 }
 
+// getChar returns the next character in the input string without advancing the position.
+// If the end of the input is reached, it returns 0 (EOF).
 func (lexer *Lexer) getChar() rune {
 	nextChar := rune(0)
 	if lexer.readPosition < len(lexer.input) {
@@ -151,6 +163,7 @@ func (lexer *Lexer) getChar() rune {
 	return nextChar
 }
 
+// skipWhitespace skips over any whitespace characters (spaces, tabs, newlines).
 func (lexer *Lexer) skipWhitespace() {
 	for lexer.currentChar == ' ' || lexer.currentChar == '\t' ||
 		lexer.currentChar == '\n' || lexer.currentChar == '\r' {
@@ -158,6 +171,8 @@ func (lexer *Lexer) skipWhitespace() {
 	}
 }
 
+// readIdentifier reads an identifier from the input string.
+// It continues reading until a non-letter character is encountered.
 func (lexer *Lexer) readIdentifier() string {
 	start := lexer.position
 	for isLetter(lexer.currentChar) {
@@ -166,7 +181,8 @@ func (lexer *Lexer) readIdentifier() string {
 	return lexer.input[start:lexer.position]
 }
 
-// TODO: add other number types
+// readNumber reads a sequence of digits (an integer) from the input string.
+// It continues reading until a non-digit character is encountered.
 func (lexer *Lexer) readNumber() string {
 	start := lexer.position
 	for unicode.IsDigit(lexer.currentChar) {
