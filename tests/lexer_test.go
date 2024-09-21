@@ -90,12 +90,12 @@ func TestLexer_NextToken(t *testing.T) {
 		token := lexer_.NextToken()
 
 		if token.Type != testToken.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
+			t.Fatalf("Wrong token type at test: %d. \nexpected: %q, got: %q",
 				iter, testToken.expectedType, token.Type)
 		}
 
 		if token.Value != testToken.expectedValue {
-			t.Fatalf("tests[%d] - value wrong. expected=%q, got=%q",
+			t.Fatalf("Wrong literal vaulue at test: %d. \nexpected: %q, got: %q",
 				iter, testToken.expectedValue, token.Value)
 		}
 	}
