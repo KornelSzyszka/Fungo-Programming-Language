@@ -1,11 +1,8 @@
 package tests
 
 import (
-	"Fungo/internal/lexer"
 	"Fungo/internal/lexer/token"
-	"Fungo/internal/parser"
 	"Fungo/internal/parser/ast"
-	"fmt"
 	"testing"
 )
 
@@ -38,7 +35,7 @@ func TestParserAst_VarStatement(t *testing.T) {
 	// Check each statement against expected variable names.
 	for i, tt := range tests {
 		statement := program.Statements[i]
-		if !testParserAstVarStatement(t, statement, tt.expectedIdentifier) {
+		if !testVarStatement(t, statement, tt.expectedIdentifier) {
 			return
 		}
 	}
@@ -206,7 +203,7 @@ func TestParserAst_PrefixExpression(t *testing.T) {
 			t.Fatalf("expression.Operator is not '%s'.\nGot: '%s'", tt.operator, expression.Operator)
 		}
 
-		if !testIntegerValue(t, expression.Right, tt.value) {
+		if !testIntegerLiteral(t, expression.Right, tt.value) {
 			return
 		}
 	}
@@ -255,7 +252,7 @@ func TestParserAst_InfixExpression(t *testing.T) {
 		}
 
 		// Test left and right values, and operator.
-		if !testIntegerValue(t, expression.Left, tt.leftValue) {
+		if !testIntegerLiteral(t, expression.Left, tt.leftValue) {
 			return
 		}
 
@@ -263,112 +260,71 @@ func TestParserAst_InfixExpression(t *testing.T) {
 			t.Fatalf("exp.Operator is not '%s'.\nGot: %s", tt.operator, expression.Operator)
 		}
 
-		if !testIntegerValue(t, expression.Right, tt.rightValue) {
+		if !testIntegerLiteral(t, expression.Right, tt.rightValue) {
 			return
 		}
 	}
 }
 
-// testParserAstVarStatement tests whether the provided statement matches the expected variable declaration.
-func testParserAstVarStatement(t *testing.T, statement ast.Statement, tokenName string) bool {
-	t.Helper()
-	if statement.TokenLiteral() != "var" {
-		t.Errorf("Token literal should be \"var\".\nGot: %s", statement.TokenLiteral())
-		return false
+// TestParserAST_IfExpression tests the parsing of if-else expressions.
+func TestParserAST_IfExpression(t *testing.T) {
+	input := `
+	if (x < y) {
+		x
+	} else {
+		y
+	}`
+
+	// Parse the program and check for exactly one statement.
+	program := getProgram(t, input)
+	if len(program.Statements) != 1 {
+		t.Fatalf("program.Statements does not contain 1 statement. Got=%d", len(program.Statements))
 	}
 
-	varStatement, ok := statement.(*ast.VarStatement)
+	// Ensure the statement is an ExpressionStatement.
+	statement, ok := program.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Errorf("Statement has wrong type: %T", statement)
-		return false
+		t.Fatalf("program.Statements[0] is not an ExpressionStatement. Got=%T", program.Statements[0])
 	}
 
-	if varStatement.Name.Value != tokenName {
-		t.Errorf("varStatement.Name.Value is not '%s'.\nGot: %s", tokenName, varStatement.Name.Value)
-		return false
-	}
-
-	if varStatement.Name.TokenLiteral() != tokenName {
-		t.Errorf("varStatement.Name.TokenLiteral is not '%s'.\nGot: %s", tokenName, varStatement.Name.TokenLiteral())
-		return false
-	}
-
-	return true
-}
-
-// testIntegerValue verifies if the expression is an integer literal and matches the expected value.
-func testIntegerValue(t *testing.T, expression ast.Expression, value int64) bool {
-	t.Helper()
-	integer, ok := expression.(*ast.IntegerLiteral)
-
+	// Verify the expression is an IFExpression.
+	ifExpression, ok := statement.Expression.(*ast.IFExpression)
 	if !ok {
-		t.Errorf("expression is not int value")
-		return false
+		t.Fatalf("statement.Expression is not an IFExpression. Got=%T", statement.Expression)
 	}
 
-	if integer.Value != value {
-		t.Errorf("Expected integer.Value=%d, got %d", value, integer.Value)
-		return false
+	// Verify the condition.
+	if !testInfixExpression(t, ifExpression.Condition, "x", "<", "y") {
+		return
 	}
 
-	if integer.TokenLiteral() != fmt.Sprintf("%d", value) {
-		t.Errorf("Expected TokenLiteral=%d, got %s", value, integer.TokenLiteral())
-		return false
+	// Verify the consequence block.
+	if len(ifExpression.Consequence.Statements) != 1 {
+		t.Fatalf("Consequence block does not contain 1 statement. Got=%d", len(ifExpression.Consequence.Statements))
 	}
 
-	return true
-}
-
-// testIdentifier verifies if the expression is an identifier and matches the expected value.
-func testIdentifier(t *testing.T, expression ast.Expression, value string) bool {
-	t.Helper()
-	identifier, ok := expression.(*ast.Identifier)
+	consequenceStatement, ok := ifExpression.Consequence.Statements[0].(*ast.ExpressionStatement)
 	if !ok {
-		t.Errorf("expression is not identifier")
-		return false
+		t.Fatalf("Consequence statement is not an ExpressionStatement. Got=%T", ifExpression.Consequence.Statements[0])
 	}
 
-	if identifier.Value != value {
-		t.Errorf("Expected identifier.Value='%s', got %s", value, identifier.Value)
-		return false
+	// Check if the consequence expression is correct.
+	testIdentifier(t, consequenceStatement.Expression, "x")
+
+	// Verify the alternative block.
+	if ifExpression.Alternative == nil {
+		t.Fatalf("Alternative block is nil.")
 	}
 
-	if identifier.TokenLiteral() != value {
-		t.Errorf("Expected TokenLiteral='%s', got %s", value, identifier.TokenLiteral())
-		return false
+	if len(ifExpression.Alternative.Statements) != 1 {
+		t.Fatalf("Alternative block does not contain 1 statement. Got=%d", len(ifExpression.Alternative.Statements))
 	}
 
-	return true
-}
-
-// getProgram parses the input string and returns the resulting AST program.
-func getProgram(t *testing.T, input string) *ast.Program {
-	t.Helper()
-	lexer_ := lexer.New(input)
-	parser_ := parser.New(lexer_)
-	program := parser_.ParseProgram()
-	checkParserErrors(t, parser_)
-	return program
-}
-
-// checkParserErrors reports any parsing errors encountered.
-func checkParserErrors(t *testing.T, parser_ *parser.Parser) {
-	t.Helper()
-	errors := parser_.Errors()
-	if len(errors) != 0 {
-		t.Fatalf("Parser has errors: %v", errors)
+	alternativeStatement, ok := ifExpression.Alternative.Statements[0].(*ast.ExpressionStatement)
+	if !ok {
+		t.Fatalf("Alternative statement is not an ExpressionStatement. Got=%T", ifExpression.Alternative.Statements[0])
 	}
-}
 
-// testLiteralExpression checks if the literal expression matches the expected value.
-func testLiteralExpression(t *testing.T, expression ast.Expression, expected interface{}) bool {
-	t.Helper()
-	switch v := expected.(type) {
-	case int, int64:
-		return testIntegerValue(t, expression, v.(int64))
-	case string:
-		return testIdentifier(t, expression, v)
-	}
-	t.Errorf("Unsupported type for expression: %T", expected)
-	return false
+	// Check if the alternative expression is correct.
+	testIdentifier(t, alternativeStatement.Expression, "y")
 }

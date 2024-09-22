@@ -176,6 +176,31 @@ func (statement *ExpressionStatement) String() string {
 	return ""
 }
 
+// BlockStatement represents a block of statements in the AST,
+// consisting of a token and a slice of contained statements.
+type BlockStatement struct {
+	Token      token.Token // The token representing the opening brace '{'.
+	Statements []Statement // A slice of statements within the block.
+}
+
+func (blockStatement *BlockStatement) StatementNode() {}
+
+// TokenLiteral returns the literal value of the block statement's token.
+func (blockStatement *BlockStatement) TokenLiteral() string {
+	return blockStatement.Token.Value
+}
+
+// String returns the block statement as a string,
+// concatenating the string representations of all statements.
+func (blockStatement *BlockStatement) String() string {
+	var output bytes.Buffer
+
+	for _, statement := range blockStatement.Statements {
+		output.WriteString(statement.String())
+	}
+	return output.String()
+}
+
 // IntegerLiteral represents an integer literal in the AST.
 type IntegerLiteral struct {
 	Token token.Token
@@ -256,4 +281,36 @@ func (expression *InfixExpression) String() string {
 	out.WriteString(expression.Right.String())
 	out.WriteString(")")
 	return out.String()
+}
+
+// IFExpression represents an if-else expression in the AST.
+type IFExpression struct {
+	Token       token.Token
+	Condition   Expression
+	Consequence *BlockStatement
+	Alternative *BlockStatement
+}
+
+func (expression *IFExpression) expressionNode() {}
+
+// TokenLiteral returns the literal value of the if-else expression's token.
+func (expression *IFExpression) TokenLiteral() string { return expression.Token.Value }
+
+// String returns the string representation of the IFExpression node.
+// It constructs a formatted string representing an `if` expression in the form:
+// 'if <condition> <consequence> [else <alternative>]'
+func (expression *IFExpression) String() string {
+	var output bytes.Buffer
+
+	output.WriteString("if")
+	output.WriteString(expression.Condition.String())
+	output.WriteString(" ")
+	output.WriteString(expression.Consequence.String())
+
+	if expression.Alternative != nil {
+		output.WriteString("else ")
+		output.WriteString(expression.Alternative.String())
+	}
+
+	return output.String()
 }

@@ -69,6 +69,7 @@ func New(lexer_ *lexer.Lexer) *Parser {
 	parser.registerPrefix(token.TRUE, parser.parseBoolean)
 	parser.registerPrefix(token.FALSE, parser.parseBoolean)
 	parser.registerPrefix(token.LPAREN, parser.parseGroupedExpression)
+	parser.registerPrefix(token.IF, parser.parseIfExpression)
 
 	// Register infix parsers.
 	parser.infixParser = make(map[token.Type]infixParser)
@@ -298,6 +299,25 @@ func (parser *Parser) parseReturnStatement() ast.Statement {
 	return statement
 }
 
+// parseBlockStatement parses a block of statements
+// for example in if expressions
+func (parser *Parser) parseBlockStatement() *ast.BlockStatement {
+	block := &ast.BlockStatement{Token: parser.currentToken}
+	block.Statements = make([]ast.Statement, 0)
+
+	parser.getNextToken()
+
+	for !parser.currentTokenIs(token.RBRACE) && !parser.currentTokenIs(token.EOF) {
+		statement := parser.parseStatement()
+		if statement != nil {
+			block.Statements = append(block.Statements, statement)
+		}
+		parser.getNextToken()
+	}
+
+	return block
+}
+
 // parseGroupedExpression parses an expression enclosed in parentheses.
 func (parser *Parser) parseGroupedExpression() ast.Expression {
 	parser.getNextToken()
@@ -308,6 +328,38 @@ func (parser *Parser) parseGroupedExpression() ast.Expression {
 	}
 
 	return expression
+}
+
+// parseIfExpression parses an if expression from the input tokens.
+// It returns an AST representation of the if expression or nil if parsing fails.
+func (parser *Parser) parseIfExpression() ast.Expression {
+	expression := &ast.IFExpression{Token: parser.currentToken}
+
+	if !parser.expectNext(token.LPAREN) {
+		return nil
+	}
+
+	parser.getNextToken()
+	expression.Condition = parser.parseExpression(LOWEST)
+
+	if !parser.expectNext(token.RPAREN) || !parser.expectNext(token.LBRACE) {
+		return nil
+	}
+
+	expression.Consequence = parser.parseBlockStatement()
+
+	if parser.nextTokenIs(token.ELSE) {
+		parser.getNextToken()
+
+		if !parser.expectNext(token.LBRACE) {
+			return nil
+		}
+
+		expression.Alternative = parser.parseBlockStatement()
+	}
+
+	return expression
+
 }
 
 // expectNext checks if the next token matches the expected token type, advancing the token stream if it does.
