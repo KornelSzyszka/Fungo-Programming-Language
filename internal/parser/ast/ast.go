@@ -1,7 +1,7 @@
-package parser
+package ast
 
 import (
-	"Fungo/internal/lexer"
+	"Fungo/internal/lexer/token"
 	"bytes"
 )
 
@@ -56,7 +56,7 @@ func (program *Program) String() string {
 // Identifier represents an identifier node, such as a variable name.
 // It holds a token and its string value.
 type Identifier struct {
-	Token lexer.Token
+	Token token.Token
 	Value string
 }
 
@@ -74,7 +74,7 @@ func (ident *Identifier) String() string {
 
 // VarType represents a variable type node, holding a token and its type as a string.
 type VarType struct {
-	Token lexer.Token
+	Token token.Token
 	Value string
 }
 
@@ -93,7 +93,7 @@ func (varType *VarType) String() string {
 // VarStatement represents a variable declaration statement, consisting of
 // a token, a name (Identifier), an optional type, and an initial value.
 type VarStatement struct {
-	Token   lexer.Token
+	Token   token.Token
 	Name    *Identifier
 	VarType *VarType
 	Value   Expression
@@ -132,7 +132,7 @@ func (statement *VarStatement) String() string {
 // ReturnStatement represents a return statement in the AST.
 // It holds a token and an optional return value expression.
 type ReturnStatement struct {
-	Token       lexer.Token
+	Token       token.Token
 	ReturnValue Expression
 }
 
@@ -159,7 +159,7 @@ func (statement *ReturnStatement) String() string {
 
 // ExpressionStatement represents a statement that consists solely of an expression.
 type ExpressionStatement struct {
-	Token      lexer.Token
+	Token      token.Token
 	Expression Expression
 }
 
@@ -178,7 +178,7 @@ func (statement *ExpressionStatement) String() string {
 
 // IntegerLiteral represents an integer literal in the AST.
 type IntegerLiteral struct {
-	Token lexer.Token
+	Token token.Token
 	Value int64
 }
 
@@ -196,7 +196,7 @@ func (statement *IntegerLiteral) String() string {
 
 // Boolean represents a boolean literal in the AST.
 type Boolean struct {
-	Token lexer.Token
+	Token token.Token
 	Value bool
 }
 
@@ -211,7 +211,7 @@ func (boolean *Boolean) String() string { return boolean.Token.Value }
 // PrefixExpression represents a prefix expression in the AST.
 // It consists of an operator and a right-hand expression.
 type PrefixExpression struct {
-	Token    lexer.Token
+	Token    token.Token
 	Operator string
 	Right    Expression
 }
@@ -235,7 +235,7 @@ func (expression *PrefixExpression) String() string {
 // InfixExpression represents an infix expression in the AST.
 // It consists of a left-hand expression, an operator, and a right-hand expression.
 type InfixExpression struct {
-	Token    lexer.Token
+	Token    token.Token
 	Left     Expression
 	Operator string
 	Right    Expression

@@ -1,14 +1,14 @@
-package lexer
+package token
 
-// TokenType represents the type of token as a string.
-type TokenType string
+// Type represents the type of token as a string.
+type Type string
 
 // List of token types to represent various elements of the language's syntax.
 const (
-	EOF        TokenType = "END OF FILE"   // Marks the end of the input.
-	IDENTIFIER           = "IDENTIFIER"    // Represents identifiers (variable/function names).
-	ILLEGAL              = "ILLEGAL"       // Marks illegal/unknown characters.
-	VARTYPE              = "VARIABLE TYPE" // Represents variable types like int, float, etc.
+	EOF        Type = "END OF FILE"   // Marks the end of the input.
+	IDENTIFIER      = "IDENTIFIER"    // Represents identifiers (variable/function names).
+	ILLEGAL         = "ILLEGAL"       // Marks illegal/unknown characters.
+	VARTYPE         = "VARIABLE TYPE" // Represents variable types like int, float, etc.
 
 	VARIABLE = "VARIABLE" // Keyword 'var' for variable declaration.
 	FUNCTION = "FUNCTION" // Keyword 'func' for function declaration.
@@ -57,12 +57,12 @@ const (
 
 // Token represents a single lexical token with its type and literal value.
 type Token struct {
-	Type  TokenType // The type of the token (e.g., IDENTIFIER, INTEGER, etc.).
-	Value string    // The literal value of the token (e.g., variable name, number).
+	Type  Type   // The type of the token (e.g., IDENTIFIER, INTEGER, etc.).
+	Value string // The literal value of the token (e.g., variable name, number).
 }
 
 // keywords maps string literals to specific token types for reserved keywords.
-var keywords = map[string]TokenType{
+var keywords = map[string]Type{
 	"var":    VARIABLE,
 	"const":  CONSTANT,
 	"func":   FUNCTION,
@@ -79,7 +79,7 @@ var keywords = map[string]TokenType{
 }
 
 // LookupIdentifier checks if an identifier is a reserved keyword or a general identifier.
-func LookupIdentifier(identifier string) TokenType {
+func LookupIdentifier(identifier string) Type {
 	// If the identifier is a keyword, return its token type. Otherwise, return IDENTIFIER.
 	if token, exists := keywords[identifier]; exists {
 		return token

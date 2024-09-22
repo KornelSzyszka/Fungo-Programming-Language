@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"Fungo/internal/lexer/token"
 	"unicode"
 )
 
@@ -32,115 +33,115 @@ func (lexer *Lexer) readChar() {
 // NextToken returns the next token from the input string.
 // It skips whitespaces and processes different token types, such as operators,
 // delimiters, numbers, and identifiers. It also handles multi-character tokens.
-func (lexer *Lexer) NextToken() Token {
+func (lexer *Lexer) NextToken() token.Token {
 	lexer.skipWhitespace()
 
-	var token_ Token
+	var token_ token.Token
 
 	switch lexer.currentChar {
 	case '=':
-		token_ = Token{Type: ASSIGN, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.ASSIGN, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '=' {
-			token_ = Token{
-				Type:  EQUAL,
+			token_ = token.Token{
+				Type:  token.EQUAL,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 	case '!':
-		token_ = Token{Type: NEGATION, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.NEGATION, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '=' {
-			token_ = Token{
-				Type:  NOTEQUAL,
+			token_ = token.Token{
+				Type:  token.NOTEQUAL,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 	case '>':
-		token_ = Token{Type: GREATER, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.GREATER, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '=' {
-			token_ = Token{
-				Type:  GREATEREQ,
+			token_ = token.Token{
+				Type:  token.GREATEREQ,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 	case '<':
-		token_ = Token{Type: LESS, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.LESS, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '=' {
-			token_ = Token{
-				Type:  LESSEQ,
+			token_ = token.Token{
+				Type:  token.LESSEQ,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 	case '+':
-		token_ = Token{Type: PLUS, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.PLUS, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '+' {
-			token_ = Token{
-				Type:  INCREMENT,
+			token_ = token.Token{
+				Type:  token.INCREMENT,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 	case '-':
-		token_ = Token{Type: MINUS, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.MINUS, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '-' {
-			token_ = Token{
-				Type:  DECREMENT,
+			token_ = token.Token{
+				Type:  token.DECREMENT,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 		if lexer.getChar() == '>' {
-			token_ = Token{
-				Type:  ARROW,
+			token_ = token.Token{
+				Type:  token.ARROW,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 	case '*':
-		token_ = Token{Type: ASTERISK, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.ASTERISK, Value: string(lexer.currentChar)}
 		if lexer.getChar() == '*' {
-			token_ = Token{
-				Type:  POWER,
+			token_ = token.Token{
+				Type:  token.POWER,
 				Value: string(lexer.currentChar) + string(lexer.getChar()),
 			}
 			lexer.readChar()
 		}
 	case '/':
-		token_ = Token{Type: SLASH, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.SLASH, Value: string(lexer.currentChar)}
 	case '(':
-		token_ = Token{Type: LPAREN, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.LPAREN, Value: string(lexer.currentChar)}
 	case ')':
-		token_ = Token{Type: RPAREN, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.RPAREN, Value: string(lexer.currentChar)}
 	case '{':
-		token_ = Token{Type: LBRACE, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.LBRACE, Value: string(lexer.currentChar)}
 	case '}':
-		token_ = Token{Type: RBRACE, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.RBRACE, Value: string(lexer.currentChar)}
 	case '[':
-		token_ = Token{Type: LBRACKET, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.LBRACKET, Value: string(lexer.currentChar)}
 	case ']':
-		token_ = Token{Type: RBRACKET, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.RBRACKET, Value: string(lexer.currentChar)}
 	case ':':
-		token_ = Token{Type: COLON, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.COLON, Value: string(lexer.currentChar)}
 	case ';':
-		token_ = Token{Type: SEMICOLON, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.SEMICOLON, Value: string(lexer.currentChar)}
 	case ',':
-		token_ = Token{Type: COMMA, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.COMMA, Value: string(lexer.currentChar)}
 	case 0:
-		token_ = Token{Type: EOF, Value: ""}
+		token_ = token.Token{Type: token.EOF, Value: ""}
 	default:
-		token_ = Token{Type: ILLEGAL, Value: string(lexer.currentChar)}
+		token_ = token.Token{Type: token.ILLEGAL, Value: string(lexer.currentChar)}
 
 		if isLetter(lexer.currentChar) {
-			token_ = Token{Type: IDENTIFIER, Value: lexer.readIdentifier()}
-			token_.Type = LookupIdentifier(token_.Value)
+			token_ = token.Token{Type: token.IDENTIFIER, Value: lexer.readIdentifier()}
+			token_.Type = token.LookupIdentifier(token_.Value)
 			return token_
 		}
 
 		if unicode.IsDigit(lexer.currentChar) {
-			token_ = Token{Type: INTEGER, Value: lexer.readNumber()}
+			token_ = token.Token{Type: token.INTEGER, Value: lexer.readNumber()}
 			return token_
 		}
 	}

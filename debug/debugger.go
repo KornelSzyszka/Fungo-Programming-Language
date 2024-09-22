@@ -22,7 +22,7 @@ func Run(input io.Reader, output io.Writer) {
 		line := scanner.Text()
 		lexer_ := lexer.New(line)
 
-		for token := lexer_.NextToken(); token.Type != lexer.EOF; token = lexer_.NextToken() {
+		for token := lexer_.NextToken(); token.Type != token.EOF; token = lexer_.NextToken() {
 			fmt.Printf("Type: %q , Value: %q\n", token.Type, token.Value)
 		}
 	}

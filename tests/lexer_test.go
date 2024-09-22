@@ -2,6 +2,7 @@ package tests
 
 import (
 	"Fungo/internal/lexer"
+	"Fungo/internal/lexer/token"
 	"testing"
 )
 
@@ -24,79 +25,79 @@ func TestLexer_NextToken(t *testing.T) {
 	`
 
 	tests := []struct {
-		expectedType  lexer.TokenType
+		expectedType  token.Type
 		expectedValue string
 	}{
-		{lexer.VARIABLE, "var"},
-		{lexer.IDENTIFIER, "five"},
-		{lexer.COLON, ":"},
-		{lexer.VARTYPE, "int"},
-		{lexer.ASSIGN, "="},
-		{lexer.INTEGER, "5"},
-		{lexer.SEMICOLON, ";"},
-		{lexer.VARIABLE, "var"},
-		{lexer.IDENTIFIER, "ten"},
-		{lexer.COLON, ":"},
-		{lexer.VARTYPE, "int"},
-		{lexer.ASSIGN, "="},
-		{lexer.INTEGER, "10"},
-		{lexer.SEMICOLON, ";"},
-		{lexer.VARIABLE, "var"},
-		{lexer.IDENTIFIER, "sum"},
-		{lexer.COLON, ":"},
-		{lexer.VARTYPE, "int"},
-		{lexer.ASSIGN, "="},
-		{lexer.FUNCTION, "func"},
-		{lexer.IDENTIFIER, "add"},
-		{lexer.LPAREN, "("},
-		{lexer.IDENTIFIER, "x"},
-		{lexer.COLON, ":"},
-		{lexer.VARTYPE, "int"},
-		{lexer.COMMA, ","},
-		{lexer.IDENTIFIER, "y"},
-		{lexer.COLON, ":"},
-		{lexer.VARTYPE, "int"},
-		{lexer.RPAREN, ")"},
-		{lexer.ARROW, "->"},
-		{lexer.VARTYPE, "int"},
-		{lexer.LBRACE, "{"},
-		{lexer.RETURN, "return"},
-		{lexer.IDENTIFIER, "x"},
-		{lexer.PLUS, "+"},
-		{lexer.IDENTIFIER, "y"},
-		{lexer.SEMICOLON, ";"},
-		{lexer.RBRACE, "}"},
-		{lexer.IDENTIFIER, "sum"},
-		{lexer.INCREMENT, "++"},
-		{lexer.SEMICOLON, ";"},
-		{lexer.IF, "if"},
-		{lexer.LPAREN, "("},
-		{lexer.IDENTIFIER, "sum"},
-		{lexer.GREATEREQ, ">="},
-		{lexer.INTEGER, "13"},
-		{lexer.RPAREN, ")"},
-		{lexer.LBRACE, "{"},
-		{lexer.RETURN, "return"},
-		{lexer.IDENTIFIER, "sum"},
-		{lexer.SEMICOLON, ";"},
-		{lexer.RBRACE, "}"},
-		{lexer.RETURN, "return"},
-		{lexer.INTEGER, "0"},
-		{lexer.SEMICOLON, ";"},
+		{token.VARIABLE, "var"},
+		{token.IDENTIFIER, "five"},
+		{token.COLON, ":"},
+		{token.VARTYPE, "int"},
+		{token.ASSIGN, "="},
+		{token.INTEGER, "5"},
+		{token.SEMICOLON, ";"},
+		{token.VARIABLE, "var"},
+		{token.IDENTIFIER, "ten"},
+		{token.COLON, ":"},
+		{token.VARTYPE, "int"},
+		{token.ASSIGN, "="},
+		{token.INTEGER, "10"},
+		{token.SEMICOLON, ";"},
+		{token.VARIABLE, "var"},
+		{token.IDENTIFIER, "sum"},
+		{token.COLON, ":"},
+		{token.VARTYPE, "int"},
+		{token.ASSIGN, "="},
+		{token.FUNCTION, "func"},
+		{token.IDENTIFIER, "add"},
+		{token.LPAREN, "("},
+		{token.IDENTIFIER, "x"},
+		{token.COLON, ":"},
+		{token.VARTYPE, "int"},
+		{token.COMMA, ","},
+		{token.IDENTIFIER, "y"},
+		{token.COLON, ":"},
+		{token.VARTYPE, "int"},
+		{token.RPAREN, ")"},
+		{token.ARROW, "->"},
+		{token.VARTYPE, "int"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.IDENTIFIER, "x"},
+		{token.PLUS, "+"},
+		{token.IDENTIFIER, "y"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.IDENTIFIER, "sum"},
+		{token.INCREMENT, "++"},
+		{token.SEMICOLON, ";"},
+		{token.IF, "if"},
+		{token.LPAREN, "("},
+		{token.IDENTIFIER, "sum"},
+		{token.GREATEREQ, ">="},
+		{token.INTEGER, "13"},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RETURN, "return"},
+		{token.IDENTIFIER, "sum"},
+		{token.SEMICOLON, ";"},
+		{token.RBRACE, "}"},
+		{token.RETURN, "return"},
+		{token.INTEGER, "0"},
+		{token.SEMICOLON, ";"},
 	}
 
 	lexer_ := lexer.New(input)
 	for iter, testToken := range tests {
-		token := lexer_.NextToken()
+		token_ := lexer_.NextToken()
 
-		if token.Type != testToken.expectedType {
+		if token_.Type != testToken.expectedType {
 			t.Fatalf("Wrong token type at test: %d. \nexpected: %q, got: %q",
-				iter, testToken.expectedType, token.Type)
+				iter, testToken.expectedType, token_.Type)
 		}
 
-		if token.Value != testToken.expectedValue {
-			t.Fatalf("Wrong literal vaulue at test: %d. \nexpected: %q, got: %q",
-				iter, testToken.expectedValue, token.Value)
+		if token_.Value != testToken.expectedValue {
+			t.Fatalf("Wrong literal value at test: %d. \nexpected: %q, got: %q",
+				iter, testToken.expectedValue, token_.Value)
 		}
 	}
 }
